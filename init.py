@@ -7,29 +7,24 @@ from util import *
 
 BLACK= pygame.Color(239,133,89)
 WHITE = pygame.Color(250,233,226)
-GRAY = pygame.Color(47,79,79)
+GRAY = pygame.Color(204,0,0)
+pygame.init()
+try: import psyco; psyco.full()
+except: "Psyco module not found: will run a tad slower"
+x = 1200
+y = 700 
 
-def update(screen, pollutants,factories,  particles):
-	background = pygame.image.load('assets/CDMX.png')
+screen = pygame.display.set_mode((x, y))
+factory_img = pygame.image.load('assets/factory_1.png').convert()
+background = pygame.image.load('assets/ESCOM.png')
+car_img = pygame.image.load('assets/car_1_UP.png').convert()
+def update(screen, cars, factories,  particles):
+	
 	screen.blit(background, (0, 0))
 
-	car_img = {'LEFT':pygame.image.load('assets/car_1_UP.png').convert(),
-			   'RIGHT':pygame.image.load('assets/car_1_DOWN.png').convert(),
-			   'UP':pygame.image.load('assets/car_1_RIGHT.png').convert(),
-			   'DOWN':pygame.image.load('assets/car_1_LEFT.png').convert()}
-
-	pollutant_size = 5
-	i = 0
-	j = 0
-	for row_pollutant in pollutants:
-		j = 0
-		for pollutant in row_pollutant:
-			if pollutant is not None:
-				screen.blit(car_img[pollutant.direction], (i*pollutant_size,j*pollutant_size))
-			j+=1
-		i+=1
-
-	factory_img = pygame.image.load('assets/factory_1.png').convert()
+	
+	pollutant_size =2
+	
 	i = 0
 	j = 0
 	for row_factory in factories:
@@ -40,7 +35,19 @@ def update(screen, pollutants,factories,  particles):
 			j+=1
 		i+=1
 
-	particle_size = 5
+
+	car_size = 2
+	
+	x = 0
+	for car in cars:
+		print car.get_current_position()
+		i, j = car.get_current_position()
+		screen.blit(car_img, (i*car_size,j*car_size))
+		particles[i][j].life_time += car.particle_life_time
+		cars[x].move_forward()
+		x+=1
+
+	particle_size = 2
 
 	i = 0
 	j = 0
@@ -70,52 +77,7 @@ def update_factories(factories, particles, x, y):
 				particles[i][j].life_time+=factory.particle_life_time
 			j+=1
 		i+=1
-	return particles
-		
-def move_cars(cars, particles, x, y):
- 	i = 0
-	j = 0
-	moved_cars = []
-	for row_car in cars:
-		j=0
-		for car in row_car:
-			if car is not None:
-				if car not in moved_cars:
-					particles[i][j].life_time+=car.particle_life_time
-
-					print "Car %s found at [%i][%i] and moved to [%i][%i]" % (str(car), i, j, i+1, j)
-				if car.direction == 'UP'  and car not in moved_cars:
-					moved_cars.append(car)
-					if cars[(i+1) % x][j] is None:
-						cars[(i+1) % x][j] = car
-						cars[i][j] = None
-					else:
-						cars[i][j].direction='RIGHT'
-				if car.direction == 'DOWN' and car not in moved_cars:
-					moved_cars.append(car)
-					if cars[i-1][j] is None:
-						cars[i-1][j] = car
-						cars[i][j] = None
-					else:
-						cars[i][j].direction='LEFT'
-				if car.direction == 'RIGHT' and car not in moved_cars:
-					moved_cars.append(car)
-					if cars[i][(j+1) % y] is None:
-						cars[i][(j+1) % y] = car
-						cars[i][j] = None
-					else:
-						cars[i][j].direction='DOWN' 
-				if car.direction == 'LEFT' and car not in moved_cars:
-					moved_cars.append(car)
-					if cars[i][j-1] is None:
-						cars[i][j-1] = car
-						cars[i][j] = None	
-					else:
-						cars[i][j].direction='UP'
-			j+=1
-		i+=1
-
-	return cars, particles
+	return particles	
 
 def update_particles(particles, x, y, rain, air):
 	particles2 = [[ Particle(0) for j in range(y)] for i in range(x)]
@@ -154,25 +116,22 @@ def update_particles(particles, x, y, rain, air):
 
 
 def main():
-	pygame.init()
-	try: import psyco; psyco.full()
-	except: "Psyco module not found: will run a tad slower"
+	
 
 
-	x = 1000
-	y = 700 
-
-	screen = pygame.display.set_mode((x, y))
+	
 	clock = pygame.time.Clock()
 
-	background = pygame.image.load('assets/CDMX_intro.png')
+	background = pygame.image.load('assets/ESCOM.png')
 	screen.blit(background, (0, 0))
 
-	car_size = 5
-	cars = generate_random_cars(2, x/car_size, y/car_size, car_size)
-	particle_size = 5
+	streets = []
+	car_size = 2
+	cars = generate_random_cars(5)
+	
+	particle_size = 2
 	particles = [[ Particle(0) for j in range(y/particle_size)] for i in range(x/particle_size)]
-	factory_size = 5
+	factory_size = 2
 	factories = [[ None for j in range(y/factory_size)] for i in range(x/factory_size)]
 
 	factory1 = Factory('Factory1')
@@ -215,6 +174,12 @@ def main():
 				elif e.key == K_LEFT: air.direction = 'WEST'
 				elif e.key == K_RIGHT: air.direction = 'EAST'
 				elif e.key == K_s: air.direction = 'STATIC'
+				elif e.key == K_a:
+					print streets
+					st_f = open('st_dump.out', 'w+')
+					for row_street in streets:
+						st_f.write('%i %i\n' % (row_street[0], row_street[1]))
+
 			
 			elif e.type == MOUSEBUTTONDOWN: moused = True
 			elif e.type == MOUSEBUTTONUP: moused = False
@@ -230,16 +195,25 @@ def main():
 
 		state_number+=1
 
+		if moused == True:
+				mx,my = [pygame.mouse.get_pos()[i]/2 for i in range(2)]
+				if (mx, my) not in streets: 
+					streets.append((mx, my))
+				pygame.draw.rect(screen,GRAY,(mx*2,my*2,2,2))
 		
+		if deleting == True:	
+			mx,my = [pygame.mouse.get_pos()[i]/2 for i in range(2)]
+			streets.remove((mx, my))
+			pygame.draw.rect(screen,BLACK,(mx*2,my*2,2,2))
+
 		if paused == False:
-			cars, particles = move_cars(cars, particles, x/car_size, y/car_size)
 			particles = update_factories(factories, particles, x/factory_size, y/factory_size)
 			particles = update_particles(particles, x/particle_size, x/particle_size, rain, air)
 			update(screen, cars, factories,  particles)
 
-		clock.tick(100)	
+		clock.tick(40)	
 		pygame.display.flip()
-		pygame.time.delay(500)
+		pygame.time.delay(100)
 		
 
 

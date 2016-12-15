@@ -2,15 +2,20 @@ import random
 from objects import *
 
 
-def generate_random_cars(n, x, y, size):
-	cars = [[ None for j in range(y)] for i in range(x)]
+def load_route(file_name):
+	route = []
+	file = open(file_name, 'r')
+	lines = file.readlines()
+	for line in lines:
+		route.append([int(x) for x in line.split(' ')])
+	return route
 
+def generate_random_cars(n):
+	cars = []
 	for i in range(n):
-		xrand = random.randint(0, x-1)
-		yrand = random.randint(0, y-1)
-		direction = random.choice(['UP', 'DOWN', 'LEFT', 'RIGHT'])
+		rand_route = random.randint(1, 3)
 		particle_life_time = random.randint(100, 150)
-		cars[xrand][yrand] = Car(direction, 1, 'car %i' %i, particle_life_time)
+		cars.append(Car(1, 'car %i' %i, particle_life_time, load_route('routes/route_%i.out'%rand_route)))
 
 	return cars
 

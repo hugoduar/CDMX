@@ -5,14 +5,29 @@ class Car(object):
 		@current_step Current step the cell is in 
 		@label label for the object
 	"""
-	def __init__(self, direction, required_steps, label, particle_life_time,color=1, current_step=0):
+	def __init__(self, required_steps, label, particle_life_time, route, color=1, current_step=0):
 		super(Car, self).__init__()
-		self.direction = direction
 		self.required_steps = required_steps 
 		self.current_step = current_step
 		self.label = label
 		self.particle_life_time = particle_life_time
 		self.color = color
+		self.route = route
+		self.route_i = 0
+		self.position = self.route[self.route_i]
+
+	def get_current_position(self):
+		return self.position
+	def get_next_position(self):
+		return self.route[self.route_i +1]
+	def move_forward(self):
+		self.route_i += 1 
+		self.position = self.route[self.route_i]
+		return self.get_current_position()
+	def move_backward(self):
+		self.route_i -= 1 
+		self.position = self.route[self.route_i]
+		return self.get_current_position()
 	def __repr__(self):
 		return self.label
 
@@ -59,4 +74,5 @@ class Rain(object):
 	def __repr__(self):
 		return "Raining"
 
+		
 
