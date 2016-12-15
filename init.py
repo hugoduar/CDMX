@@ -9,18 +9,19 @@ BLACK= pygame.Color(239,133,89)
 WHITE = pygame.Color(250,233,226)
 GRAY = pygame.Color(204,0,0)
 pygame.init()
+clock = pygame.time.Clock()
 try: import psyco; psyco.full()
 except: "Psyco module not found: will run a tad slower"
 x = 1200
 y = 700 
 
 screen = pygame.display.set_mode((x, y))
-factory_img = pygame.image.load('assets/factory_1.png').convert()
+factory_img = pygame.image.load('assets/factory_1.png')
 background = pygame.image.load('assets/ESCOM.png')
-car_img = pygame.image.load('assets/car_1_UP.png').convert()
+car_img = pygame.image.load('assets/car_1_UP.png')
 def update(screen, cars, factories,  particles):
 	
-	screen.blit(background, (0, 0))
+	#screen.blit(background, (0, 0))
 
 	
 	pollutant_size =2
@@ -49,21 +50,21 @@ def update(screen, cars, factories,  particles):
 
 	particle_size = 2
 
-	i = 0
-	j = 0
-	for row_particle in particles:
-		j = 0
-		for particle in row_particle:
-			s = pygame.Surface((particle_size,particle_size)) 
-			if particle.life_time >= 128: 
-				s.set_alpha(128)
-			else:
-				s.set_alpha(particle.life_time)
-			s.fill(GRAY)           
-			screen.blit(s, (i*particle_size,j*particle_size))
+	# i = 0
+	# j = 0
+	# for row_particle in particles:
+	# 	j = 0
+	# 	for particle in row_particle:
+	# 		s = pygame.Surface((particle_size,particle_size)) 
+	# 		if particle.life_time >= 128: 
+	# 			s.set_alpha(128)
+	# 		else:
+	# 			s.set_alpha(particle.life_time)
+	# 		s.fill(GRAY)           
+	# 		screen.blit(s, (i*particle_size,j*particle_size))
 			
-			j+=1
-		i+=1
+	# 		j+=1
+	# 	i+=1
 	
 	
 
@@ -117,12 +118,6 @@ def update_particles(particles, x, y, rain, air):
 
 def main():
 	
-
-
-	
-	clock = pygame.time.Clock()
-
-	background = pygame.image.load('assets/ESCOM.png')
 	screen.blit(background, (0, 0))
 
 	streets = []
@@ -135,15 +130,15 @@ def main():
 	factories = [[ None for j in range(y/factory_size)] for i in range(x/factory_size)]
 
 	factory1 = Factory('Factory1')
-	factories[50][50] = factory1
 	factory2 = Factory('Factory1')
-	factories[60][60] = factory1
-	factories[10][30] = factory1
-	factories[20][80] = factory1
-	factories[25][100] = factory1
-	factories[190][120] = factory1
-	factories[180][80] = factory1
-	factories[160][70] = factory1
+	factories[89][269] = factory1
+	factories[72][232] = factory1
+	factories[85][210] = factory1
+	factories[25][193] = factory1
+	factories[10][19] = factory1
+	factories[153][140] = factory1
+	factories[115][325] = factory1
+	factories[166][252] = factory1
 
 	air = Air('STATIC')
 	rain = Rain(20, active=False)
@@ -159,6 +154,13 @@ def main():
 	deleting = False
 	paused = True
 	moused = False
+	print """Controls \n
+				 - Use narrows to move the air: ^, <, >\n 
+				 - Press [s] to stop the air\n 
+				 - Pause and play with [p]\n 
+				 - Pause and play the game with [p]\n 
+				 - Get it rains with [r]\n 
+				 """
 	while True:
 		for e in pygame.event.get():
 			if e.type == QUIT:
@@ -175,6 +177,7 @@ def main():
 				elif e.key == K_RIGHT: air.direction = 'EAST'
 				elif e.key == K_s: air.direction = 'STATIC'
 				elif e.key == K_a:
+					pass
 					print streets
 					st_f = open('st_dump.out', 'w+')
 					for row_street in streets:
@@ -210,10 +213,12 @@ def main():
 			particles = update_factories(factories, particles, x/factory_size, y/factory_size)
 			particles = update_particles(particles, x/particle_size, x/particle_size, rain, air)
 			update(screen, cars, factories,  particles)
+			print len(particles)*len(particles[0])
 
-		clock.tick(40)	
+
+		clock.tick(100)	
 		pygame.display.flip()
-		pygame.time.delay(100)
+		#pygame.time.delay(500)
 		
 
 

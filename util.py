@@ -13,7 +13,7 @@ def load_route(file_name):
 def generate_random_cars(n):
 	cars = []
 	for i in range(n):
-		rand_route = random.randint(1, 3)
+		rand_route = i%6 + 1
 		particle_life_time = random.randint(100, 150)
 		cars.append(Car(1, 'car %i' %i, particle_life_time, load_route('routes/route_%i.out'%rand_route)))
 
